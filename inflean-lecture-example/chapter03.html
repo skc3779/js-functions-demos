@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chapter 03</title>
+    <script src="js/_.js"></script>
+    <script src="../인프런-동영상-강의-예제/js/partial.js"></script>
+</head>
+<body>
+    <script type="application/javascript">
+        var users = [
+            { id: 1, name: 'ID', age: 36 },
+            { id: 2, name: 'BJ', age: 32 },
+            { id: 3, name: 'JM', age: 32 },
+            { id: 4, name: 'PJ', age: 27 },
+            { id: 5, name: 'HA', age: 25 },
+            { id: 6, name: 'JE', age: 26 },
+            { id: 7, name: 'JI', age: 31 },
+            { id: 8, name: 'MP', age: 23 }
+        ];
+
+        // 1. 수집하기 map, values, pluck etc
+
+        console.log(_map(users, function(user) {
+            return user.name;
+        }))
+
+        // values 를 꺼내는 함수 만들기
+
+        function _values(data) {
+            return _map(data, function(val) { return val;});
+        }
+
+        console.log('object', users[0]);
+        console.log('key', _keys(users[0]));
+        console.log('value',_values(users[0]));
+
+        function _values(data) {
+            return _map(data, _identity);
+        }
+
+        function _identity(val) {
+            return val;
+        }
+
+        console.log('object', users[0]);
+        console.log('key', _keys(users[0]));
+        console.log('value',_values(users[0]));
+
+        // values 함수와 동일함을 알 수 있음
+        console.log('value', _map(_identity)(users[0]));
+
+        var _values = _map(_identity);
+        console.log('value', _values(users[0]));
+
+        // pluck
+
+        function _pluck(data, key) {
+            return _map(data, function(obj) {
+               return obj[key];
+            });
+        }
+
+        console.log('pluck', _pluck(users, 'age'));
+
+        function _pluck(data, key) {
+            return _map(data, _get(key));
+        }
+
+        console.log('pluck', _pluck(users, 'age'));
+
+        // 2. 거르기 filter, reject, compact, without etc
+        // reject 만들기
+        console.log('filter',
+            _filter(users, function(user) {
+                return user.age > 30;
+            })
+        );
+
+        function _reject(data, predi) {
+            return _filter(data, function(val) {
+                return !predi(val);
+            })
+        }
+
+        console.log('reject',
+            _reject(users, function(user) {
+                return user.age > 30;
+            })
+        );
+
+        function _negate(func) {
+            return function(val) {
+                return !func(val);
+            }
+        }
+
+        var _reject =  _curryr(function(data, predi) {
+            return _filter(data, _negate(predi));
+        });
+
+        console.log('reject',
+            _reject(users, function(user) {
+                return user.age > 30;
+            })
+        );
+
+        // compact  만들기
+        var _compact = _filter(_identity);
+
+         console.log('compact',
+            _compact([1,2,true,null,{}])
+         );
+
+        // 3. 찾아내기 find some, every etc
+
+        // find 리스트를 돌면서 첫 조건에 맞는 객체를 리턴해 주는 함수
+        var _find = _curryr(function(list, predi) {
+            var keys = _keys(list);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                var val = list[keys[i]];
+                if(predi(val)) return val;
+            }
+            return list;
+        });
+
+        console.log('find',
+            _find(users, function(user) {
+                return user.age < 30;
+            })
+        );
+
+        var _find_index = _curryr(function (list, predi) {
+            var keys = _keys(list);
+            for (var i = 0, len = keys.length; i < len; i++) {
+                var val = list[keys[i]];
+                if(predi(val)) return i;
+            }
+            return -1;
+        });
+
+        console.log('find_index',
+            _find_index(users, function(user) {
+                return user.age < 30;
+            })
+        );
+
+        var idx;
+        idx = _go(users,
+            _find_index(function(user) { return user.age < 30; }));
+        console.log('find_index', idx);
+
+        // some 만들기
+        function _some(data, predi) {
+            return _find_index(data, predi || _identity) !== -1;
+        }
+
+        console.log('some', _some([1,2,5], function(val) {
+            return val > 10;
+        }));
+
+        console.log('some', _some([1,2,5,10,20]));
+
+
+        function _every(data, predi) {
+            return _find_index(data, _negate(predi || _identity)) === -1;
+        }
+
+        console.log('every', _every([1,2,5,10,20], function(val) {
+            return val > 10;
+        }));
+
+        console.log('every', _every([1,2,5,10,20]));
+
+        // 4. 접기 reduce, min, max, group_by, count_by
+
+        function _min(data) {
+            return _reduce(data, function(a, b){
+                return a < b ? a : b;
+            });
+        }
+
+        console.log('min',
+            _min([5,1,20,10,15])
+        );
+
+
+        function _max(data) {
+            return _reduce(data, function(a, b){
+                return a > b ? a : b;
+            });
+        }
+
+        console.log('max',
+            _max([5,1,20,10,15])
+        );
+
+
+        var _min_by = _curryr(function(data, iter) {
+            return _reduce(data, function(a, b){
+                return iter(a) < iter(b) ? a : b;
+            });
+        });
+
+        console.log('min_by',
+            _min_by([5,1,-20,10,15], Math.abs)
+        );
+
+        var _max_by =  _curryr(function(data, iter) {
+            return _reduce(data, function(a, b){
+                return iter(a) > iter(b) ? a : b;
+            });
+        });
+
+        console.log('max_by',
+            _max_by([5,1,-20,10,15], Math.abs)
+        );
+
+        _go(users,
+            _filter(user => user.age >=30 ),
+            _min_by(function(user){
+                return user.age
+            }),
+            console.log);
+
+        _go(users,
+            _reject(user => user.age >=30 ),
+            _min_by(function(user){
+                return user.age
+            }),
+            console.log);
+
+        var _group_by = _curryr(function(data, iter){
+            return _reduce(data, function(grouped, val){
+                var key = iter(val);
+                (grouped[key] = grouped[key] || []).push(val);
+                return grouped;
+            }, {});
+        });
+
+        console.log('group',
+            _group_by(users, function(user) {
+                return user.age;
+            })
+        );
+
+        function _push(obj, key, val) {
+            (obj[key] = obj[key] || []).push(val);
+            return obj;
+        }
+
+        var _group_by = _curryr(function(data, iter){
+            return _reduce(data, function(grouped, val){
+                return _push(grouped, iter(val), val);
+            }, {});
+        });
+
+        console.log('group',
+            _group_by(users, function(user) {
+                return user.age;
+            })
+        );
+
+        console.log('group', _go(users, _group_by(_get('age'))));
+
+
+        var _count_by = _curryr(function(data, iter) {
+            return _reduce(data, function(count, val) {
+                var key = iter(val);
+                count[key] ? count[key]++ : count[key]=1;
+                return count;
+            }, {})
+        });
+
+        console.log('count',
+            _count_by(users, function(user){
+                return user.age;
+            })
+        );
+
+        console.log('count',
+            _count_by(users, function(user){
+                return user.age - user.age%10;
+            })
+        );
+
+        var _inc = function(count, key) {
+            count[key] ? count[key]++ : count[key]=1;
+            return count;
+        };
+
+        var _count_by = _curryr(function(data, iter) {
+            return _reduce(data, function(count, val) {
+                return _inc(count, iter(val));
+            }, {})
+        });
+
+
+        console.log('count',
+            _count_by(users, function(user){
+                return user.age;
+            })
+        );
+
+        console.log('count',
+            _count_by(users, function(user){
+                return user.age - user.age%10;
+            })
+        );
+
+        _go(users,
+            _count_by(function(user){
+                return user.age - user.age%10;
+            }),
+            _map(function(count, key){
+                return `${key}대는 ${count}명 입니다`;
+            }),
+            console.log
+        );
+
+
+        _go(users,
+            _count_by(function(user){
+                return user.age - user.age%10;
+            }),
+            _map(function(count, key){
+                return `<li>${key}대는 ${count}명 입니다</li>`;
+            }),
+            function(list) {
+                return '<ul>'+list.join('')+'</ul>';
+            },
+            function(html) {
+                document.write(html)
+            }
+        );
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>

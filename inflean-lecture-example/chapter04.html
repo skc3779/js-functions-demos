@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chapter 04</title>
+    <script src="js/partial.js"></script>
+</head>
+<body>
+    <script type="application/javascript">
+
+        // 지연평가를 시작 시키고 유지 시키는 (이어가는) 함수
+
+        // 1. map
+        // 2. filter, reject
+
+
+        _.go(
+            _.range(100),
+            _.map(function(val) {
+                return val * val;
+            }),
+            _.filter(function(val) {
+               return val % 2;
+            }),
+            _.take(5),
+            console.log
+        );
+
+        // 지연평가
+        _.go(
+            _.range(100),
+            L.map(function(val) {
+                return val * val;
+            }),
+               L.filter(function(val) {
+                return val % 2;
+            }),
+            L.take(5),
+            console.log
+        );
+
+        // 끈을 내는 함수
+
+        // 1. take
+        // 2. some, every, find
+
+
+
+
+
+
+
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    </script>
+</body>
+</html>
