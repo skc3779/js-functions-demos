@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>Chapter 02</title>
+</head>
+<body>
+    <script type="application/javascript">
+        // 2.2.8 유명 함수를 이용한 재귀
+        function flatten(arr) {
+            return function f(arr, new_arr) {
+                arr.forEach(function(v) {
+                    Array.isArray(v) ? f(v, new_arr) : new_arr.push(v);
+                });
+                return new_arr;
+            }(arr, []);
+        }
+
+        console.log('flatten 1', flatten([1, [2], [3, 4]]) );
+        // [1, 2, 3, 4]
+    </script>
+</body>
+</html>
